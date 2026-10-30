@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>制作看板 · Production Board</title>
+<meta name="description" content="把口播逐字稿变成能预演、能直接改的视频制作看板。A Claude Skill that turns a voice-over script into a playable, editable production board.">
+<meta property="og:title" content="制作看板 · Production Board">
+<meta property="og:description" content="拍之前，先把片子剪完。Cut the film before you shoot it.">
+<meta property="og:image" content="assets/cover.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Noto+Serif+SC:wght@600;900&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0b0c;--bg2:#121214;--ink:#ecE8e1;--ink2:rgba(236,232,225,.62);--ink3:rgba(236,232,225,.38);--line:rgba(255,255,255,.08);--paper:#e8e1d2;--red:#e0352b;--acc:#8197ff}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font:400 17px/1.75 "Noto Sans SC",system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+img,video{display:block;max-width:100%}
+.wrap{width:min(1120px,calc(100% - 32px));margin:0 auto}
+.serif{font-family:"Noto Serif SC",serif;font-weight:900}
+.it{font-family:"Instrument Serif",serif;font-style:italic;font-weight:400}
+[data-l]{display:none}
+html[lang="zh-CN"] [data-l="zh"],html[lang="en"] [data-l="en"]{display:revert}
+/* nav */
+nav{position:fixed;inset:0 0 auto;z-index:20;backdrop-filter:blur(14px);background:rgba(11,11,12,.72);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;gap:24px;height:60px}
+nav .logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:500}
+.dia{width:14px;height:14px;background:#0e0e0e;border:1.5px solid rgba(232,225,210,.55);transform:rotate(45deg);border-radius:2px}
+nav .sp{flex:1}
+nav a.lk{text-decoration:none;color:var(--ink2);font-size:15px}
+nav a.lk:hover{color:var(--ink)}
+.lang{border:1px solid var(--line);background:none;color:var(--ink);border-radius:999px;padding:5px 14px;font:inherit;font-size:14px;cursor:pointer}
+/* hero */
+header{padding:140px 0 60px;text-align:center;position:relative}
+header::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(255,255,255,.07),transparent 70%);pointer-events:none}
+.eyebrow{font-size:14px;letter-spacing:.32em;color:var(--ink3);text-transform:uppercase}
+h1{font-size:clamp(56px,9vw,112px);line-height:1.05;margin:18px 0 6px;letter-spacing:.04em}
+h1 .it{display:block;font-size:.42em;letter-spacing:0;color:var(--ink2);margin-top:8px}
+.tag{font-size:clamp(20px,2.6vw,28px);margin:22px auto 8px;color:var(--ink)}
+.sub{max-width:640px;margin:0 auto;color:var(--ink2)}
+.cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:34px 0 0}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:500;font-size:16px;border:1px solid var(--line);transition:transform .2s,background .2s}
+.btn:hover{transform:translateY(-1px)}
+.btn.pri{background:var(--paper);color:#151413;border-color:var(--paper)}
+.btn.pri:hover{background:#fff}
+.btn.gh{background:rgba(255,255,255,.04)}
+.film{margin:64px auto 0;width:min(900px,100%);aspect-ratio:4/3;border-radius:16px;overflow:hidden;background:#000;box-shadow:0 60px 140px rgba(0,0,0,.7),0 0 0 1px var(--line);position:relative}
+.film video{width:100%;height:100%;object-fit:cover}
+.film .snd{position:absolute;right:14px;bottom:14px;background:rgba(10,10,12,.66);border:1px solid rgba(255,255,255,.18);color:#fff;border-radius:999px;padding:6px 14px;font:inherit;font-size:13px;cursor:pointer;backdrop-filter:blur(8px)}
+/* sections */
+section{padding:110px 0 0}
+.kicker{font-size:13px;letter-spacing:.3em;color:var(--ink3);text-transform:uppercase;margin-bottom:12px}
+h2{font-size:clamp(32px,4.6vw,52px);line-height:1.15}
+h2 .it{color:var(--ink2);font-size:.7em;margin-left:10px}
+.lead{max-width:720px;color:var(--ink2);margin-top:18px;font-size:18px}
+.why{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+.why p{color:var(--ink2);margin-bottom:14px}
+.quote{border-left:2px solid var(--paper);padding-left:20px;font-size:22px;line-height:1.6}
+.feat{display:grid;grid-template-columns:1fr 1.35fr;gap:56px;align-items:center;margin-top:90px}
+.feat.r{grid-template-columns:1.35fr 1fr}
+.feat.r .txt{order:2}
+.feat .num{font-family:"Instrument Serif",serif;font-style:italic;font-size:64px;line-height:1;color:var(--ink3)}
+.feat h3{font-family:"Noto Serif SC",serif;font-weight:900;font-size:30px;margin:10px 0 14px;line-height:1.3}
+.feat h3 .it{display:block;font-size:20px;color:var(--ink3);margin-top:4px}
+.feat p{color:var(--ink2)}
+.feat ul{list-style:none;margin-top:16px}
+.feat li{padding:7px 0;border-top:1px solid var(--line);color:var(--ink2);font-size:15px}
+.shot{border-radius:12px;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,.6),0 0 0 1px var(--line);background:var(--bg2)}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;margin-top:44px}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.card img{aspect-ratio:16/10;object-fit:cover;object-position:top;width:100%}
+.card div{padding:18px 20px 20px}
+.card b{font-family:"Noto Serif SC",serif;font-size:19px}
+.card p{color:var(--ink2);font-size:15px;margin-top:4px}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:44px;counter-reset:s}
+.step{border-top:1px solid var(--ink3);padding-top:18px}
+.step::before{counter-increment:s;content:"0" counter(s);font-family:"Instrument Serif",serif;font-style:italic;font-size:34px;color:var(--ink3);display:block;margin-bottom:6px}
+.step b{display:block;font-family:"Noto Serif SC",serif;font-size:18px;margin-bottom:6px}
+.step p{color:var(--ink2);font-size:15px}
+pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:20px 22px;overflow-x:auto;font:14px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;color:#d8d4cc;margin-top:18px}
+.install{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:40px}
+.install .box{min-width:0;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:24px}
+.install h4{font-family:"Noto Serif SC",serif;font-size:19px;margin-bottom:8px}
+.install p,.install li{color:var(--ink2);font-size:15px}
+.install ol{padding-left:20px}
+footer{margin-top:120px;padding:44px 0 60px;border-top:1px solid var(--line);color:var(--ink3);font-size:14px}
+footer .wrap{display:flex;gap:20px;flex-wrap:wrap;justify-content:space-between}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+@media (max-width:860px){
+  .why,.feat,.feat.r,.install{grid-template-columns:1fr;gap:28px}
+  .feat.r .txt{order:0}
+  .grid{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr 1fr}
+  nav a.lk{display:none}
+  header{padding-top:110px}
+}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+  <a class="logo" href="#"><span class="dia"></span><span data-l="zh">制作看板</span><span data-l="en">Production Board</span></a>
+  <span class="sp"></span>
+  <a class="lk" href="#features"><span data-l="zh">功能</span><span data-l="en">Features</span></a>
+  <a class="lk" href="#start"><span data-l="zh">开始使用</span><span data-l="en">Get started</span></a>
+  <a class="lk" href="demo/"><span data-l="zh">在线体验</span><span data-l="en">Live demo</span></a>
+  <a class="lk" href="https://github.com/guangjun5952/production-board">GitHub</a>
+  <button class="lang" id="lang" type="button">EN</button>
+</div></nav>
+
+<header><div class="wrap">
+  <div class="eyebrow">A Claude Skill</div>
+  <h1 class="serif">制作看板<span class="it">Production Board</span></h1>
+  <p class="tag serif"><span data-l="zh">拍之前，先把片子剪完。</span><span data-l="en">Cut the film before you shoot it.</span></p>
+  <p class="sub"><span data-l="zh">丢进一份口播逐字稿，得到一个能按空格从头预演、能直接拖动修改的视频制作看板。一个 HTML 文件，打开就能用。</span><span data-l="en">Hand it a voice-over script and get back a production board you can play from the top and edit by dragging. One HTML file, open and go.</span></p>
+  <div class="cta">
+    <a class="btn pri" href="demo/"><span data-l="zh">在线体验示例看板</span><span data-l="en">Open the live demo</span> →</a>
+    <a class="btn gh" href="assets/production-board-skill.zip" download><span data-l="zh">下载 Skill</span><span data-l="en">Download the Skill</span></a>
+    <a class="btn gh" href="https://github.com/guangjun5952/production-board">GitHub</a>
+  </div>
+  <div class="film reveal">
+    <video id="promo" src="assets/promo.mp4" poster="assets/cover.jpg" autoplay muted loop playsinline preload="metadata"></video>
+    <button class="snd" id="snd" type="button"><span data-l="zh">打开声音</span><span data-l="en">Sound on</span></button>
+  </div>
+</div></header>
+
+<section><div class="wrap why reveal">
+  <div>
+    <div class="kicker"><span data-l="zh">为什么</span><span data-l="en">Why</span></div>
+    <h2 class="serif"><span data-l="zh">文字分镜写得再好，也很难在脑子里播一遍。</span><span data-l="en">A written shot list doesn't play in your head.</span></h2>
+  </div>
+  <div>
+    <p data-l="zh">AI 交过来的通常是一大堆表格和文档：看不完，也没法动手改。拍完才发现节奏不对，就只能重来。</p>
+    <p data-l="en">What AI usually hands you is a pile of tables and documents: too long to read, impossible to edit by hand. You find out the pacing is off only after the shoot.</p>
+    <p data-l="zh">制作看板把逐字稿直接排成一条剪辑时间线：每个镜头多长、画面里有什么、哪里录屏、哪里实拍、哪里叠贴纸，全在上面。不对就拖，改完一键交回给 Agent。</p>
+    <p data-l="en">Production Board lays the script straight onto an editing timeline: shot lengths, what's on screen, where the screen recordings, live shots and overlays go. If something's off, drag it, then send every change back to the agent in one click.</p>
+    <p class="quote serif"><span data-l="zh">写脚本的时候，片子就已经剪完了。</span><span data-l="en">By the time the script is written, the cut is done.</span></p>
+  </div>
+</div></section>
+
+<section id="features"><div class="wrap">
+  <div class="kicker reveal"><span data-l="zh">功能</span><span data-l="en">Features</span></div>
+  <h2 class="serif reveal"><span data-l="zh">从逐字稿到可以动手的剪辑台</span><span data-l="en">From script to an edit desk you can touch</span></h2>
+
+  <div class="feat reveal">
+    <div class="txt">
+      <div class="num">01</div>
+      <h3><span data-l="zh">像剪辑软件一样的时间线</span><span data-l="en">A timeline that works like an NLE</span><span class="it">Edit desk</span></h3>
+      <p data-l="zh">镜头时长按语速自动算好，口播、录屏、B-roll、叠加贴四条画面轨，口播 VO、音效、音乐三条音频轨。按空格带声音整片预演。</p>
+      <p data-l="en">Shot lengths come from speaking rate. Four video tracks (A-roll, screen, B-roll, overlay) and three audio tracks (VO, SFX, music). Press space to play the whole cut with sound.</p>
+      <ul>
+        <li><span data-l="zh">拖动 clip、拖两端改时长，联动 · 波纹 · 磁吸 · 撤销</span><span data-l="en">Drag and trim clips with link, ripple, snap and undo</span></li>
+        <li><span data-l="zh">音乐、音效、口播录音直接拖进来，淡入淡出、调音量</span><span data-l="en">Drop in music, SFX and VO; fades and volume</span></li>
+        <li><span data-l="zh">导出 FCP 7 XML，在 Premiere、达芬奇里继续剪</span><span data-l="en">Export FCP 7 XML for Premiere or DaVinci Resolve</span></li>
+      </ul>
+    </div>
+    <div class="shot"><img src="assets/timeline-drag.gif" alt="" loading="lazy"></div>
+  </div>
+
+  <div class="feat r reveal">
+    <div class="txt">
+      <div class="num">02</div>
+      <h3><span data-l="zh">搭积木一样预演动效</span><span data-l="en">Block out the motion</span><span class="it">Preview canvas</span></h3>
+      <p data-l="zh">60 多个手绘分镜风格的画面组件，从组件库拖进画布，摆位置、改大小、设出现时间和入场方式。做动效的 Agent 能照着知道每个元素该在哪、什么时候出来。</p>
+      <p data-l="en">60+ storyboard-style components. Drag them onto the canvas, position and resize, set when and how they enter. The motion agent can see exactly what appears where, and when.</p>
+    </div>
+    <div class="shot"><img src="assets/component-drag.gif" alt="" loading="lazy"></div>
+  </div>
+
+  <div class="feat reveal">
+    <div class="txt">
+      <div class="num">03</div>
+      <h3><span data-l="zh">风格连到镜头，一键交给 Agent</span><span data-l="en">Wire a style to a shot, hand it off</span><span class="it">Asset canvas · Style library</span></h3>
+      <p data-l="zh">无限画布上，要录屏、实拍的镜头先框好位置，拍完拖进框就到位。风格资产库里有 66 种用 Opus 5.5 纯代码做的影片风格，连线到镜头，点「生成动效任务」，任务说明就整理好了。</p>
+      <p data-l="en">On an infinite canvas, frames wait for the footage you still need to shoot; drop the clip in and it's placed. The style library has 66 film styles built in pure code with Opus 5.5. Connect a style to shots, press "Generate motion task", and the brief is written.</p>
+    </div>
+    <div class="shot"><img src="assets/canvas-link.gif" alt="" loading="lazy"></div>
+  </div>
+
+  <div class="feat r reveal">
+    <div class="txt">
+      <div class="num">04</div>
+      <h3><span data-l="zh">拍完回来对答案</span><span data-l="en">Check against the final cut</span><span class="it">Compare</span></h3>
+      <p data-l="zh">成片导入看板，用滑杆、橡皮擦或圆形蒙版把预演和成片擦开对比，位置、节奏对不对得上，一眼就清楚。</p>
+      <p data-l="en">Import the finished edit and wipe between preview and final with a slider, a brush or a circular mask. Framing and timing either line up or they don't.</p>
+    </div>
+    <div class="shot"><img src="assets/compare-wipe.gif" alt="" loading="lazy"></div>
+  </div>
+
+  <div class="grid">
+    <div class="card reveal"><img src="assets/storyboard.jpg" alt="" loading="lazy"><div><b><span data-l="zh">故事板</span><span data-l="en">Storyboard</span></b><p><span data-l="zh">所有镜头按章节铺开，一页看完整片结构。</span><span data-l="en">Every shot by chapter, the whole structure on one page.</span></p></div></div>
+    <div class="card reveal"><img src="assets/style-library.jpg" alt="" loading="lazy"><div><b><span data-l="zh">风格资产库</span><span data-l="en">Style library</span></b><p><span data-l="zh">66 种影片风格，可以加自己的风格和封面。</span><span data-l="en">66 film styles, plus your own styles and covers.</span></p></div></div>
+    <div class="card reveal"><img src="assets/shot-lists.jpg" alt="" loading="lazy"><div><b><span data-l="zh">录屏与素材清单</span><span data-l="en">Recording & asset lists</span></b><p><span data-l="zh">要录什么、怎么录、录没录，逐条勾掉。</span><span data-l="en">What to capture, how, and what's done.</span></p></div></div>
+    <div class="card reveal"><img src="assets/prompts.jpg" alt="" loading="lazy"><div><b><span data-l="zh">提示词与评论</span><span data-l="en">Prompts & notes</span></b><p><span data-l="zh">视频生成提示词集中放；每镜可批注，一键复制修改给 AI 批量回改。</span><span data-l="en">Video prompts in one place; comment on any shot and send all changes back in one click.</span></p></div></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="kicker reveal"><span data-l="zh">流程</span><span data-l="en">How it works</span></div>
+  <h2 class="serif reveal"><span data-l="zh">四步，从稿子到看板</span><span data-l="en">Four steps from script to board</span></h2>
+  <div class="steps reveal">
+    <div class="step"><b><span data-l="zh">丢进逐字稿</span><span data-l="en">Paste the script</span></b><p><span data-l="zh">对 Claude 说「做一个制作看板」。</span><span data-l="en">Ask Claude for a production board.</span></p></div>
+    <div class="step"><b><span data-l="zh">回答几个问题</span><span data-l="en">Answer a few questions</span></b><p><span data-l="zh">画幅、要不要出镜、B-roll 风格、素材从哪来。</span><span data-l="en">Aspect ratio, on-camera or not, B-roll style, footage.</span></p></div>
+    <div class="step"><b><span data-l="zh">打开看板预演</span><span data-l="en">Open and play</span></b><p><span data-l="zh">按空格看一遍，拖、改、批注。</span><span data-l="en">Press space, then drag, edit and comment.</span></p></div>
+    <div class="step"><b><span data-l="zh">一键交回回改</span><span data-l="en">Send it back</span></b><p><span data-l="zh">复制修改给 AI，拿到新版本。</span><span data-l="en">Copy your changes to the AI and get the next version.</span></p></div>
+  </div>
+</div></section>
+
+<section id="start"><div class="wrap">
+  <div class="kicker reveal"><span data-l="zh">开始使用</span><span data-l="en">Get started</span></div>
+  <h2 class="serif reveal"><span data-l="zh">装上 Skill</span><span data-l="en">Install the Skill</span></h2>
+  <div class="install reveal">
+    <div class="box">
+      <h4><span data-l="zh">Claude 网页 / 桌面版</span><span data-l="en">Claude on web / desktop</span></h4>
+      <ol>
+        <li><span data-l="zh">下载 </span><span data-l="en">Download </span><a href="assets/production-board-skill.zip" download>production-board-skill.zip</a></li>
+        <li><span data-l="zh">在设置里找到 Skills（技能），上传这个 zip</span><span data-l="en">Find Skills in settings and upload the zip</span></li>
+        <li><span data-l="zh">把逐字稿丢给 Claude，说「做一个制作看板」</span><span data-l="en">Give Claude your script and ask for a production board</span></li>
+      </ol>
+    </div>
+    <div class="box">
+      <h4>Claude Code</h4>
+      <p><span data-l="zh">把 Skill 文件夹放进 skills 目录：</span><span data-l="en">Put the Skill folder in your skills directory:</span></p>
+<pre>git clone https://github.com/guangjun5952/production-board
+cp -r production-board/skill/production-board ~/.claude/skills/</pre>
+    </div>
+  </div>
+  <p class="lead reveal"><span data-l="zh">看板界面和 Skill 说明目前是中文的；英文稿子 Claude 也能照常处理。示例看板就是介绍这个项目的那期视频的完整看板。</span><span data-l="en">The board UI and Skill instructions are in Chinese for now; Claude handles English scripts just fine. The live demo is the full board for the video that introduces this project.</span></p>
+</div></section>
+
+<footer><div class="wrap">
+  <span>© 2026 光郡 · MIT License</span>
+  <span><span data-l="zh">风格资产库来自 </span><span data-l="en">Style library from </span><a href="https://github.com/lemomo-ai/lemo-opuscar">lemomo-ai/lemo-opuscar</a> (MIT)</span>
+</div></footer>
+
+<script>
+(function () {
+  var root = document.documentElement, btn = document.getElementById('lang');
+  function set(l) { root.lang = l; btn.textContent = l === 'en' ? '中文' : 'EN'; document.title = l === 'en' ? 'Production Board · 制作看板' : '制作看板 · Production Board'; try { localStorage.setItem('pb-lang', l); } catch (e) {} }
+  var saved = null; try { saved = localStorage.getItem('pb-lang'); } catch (e) {}
+  var q = new URLSearchParams(location.search).get('lang');
+  set(q === 'en' || q === 'zh' ? (q === 'en' ? 'en' : 'zh-CN') : saved || (/^zh/i.test(navigator.language || '') ? 'zh-CN' : 'en'));
+  btn.onclick = function () { set(root.lang === 'en' ? 'zh-CN' : 'en'); };
+  var v = document.getElementById('promo'), s = document.getElementById('snd');
+  s.onclick = function () { v.muted = !v.muted; if (!v.muted) { v.currentTime = 0; v.play(); } s.querySelector('[data-l=zh]').textContent = v.muted ? '打开声音' : '关闭声音'; s.querySelector('[data-l=en]').textContent = v.muted ? 'Sound on' : 'Sound off'; };
+  var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: .12 });
+  document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+})();
+</script>
+</body>
+</html>
