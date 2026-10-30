@@ -92,7 +92,7 @@ docs/                       项目主页（GitHub Pages）、在线体验、截�
 
 ## 致谢
 
-- 风格资产库里的 66 种影片风格和封面来自 [lemomo-ai/lemo-opuscar](https://github.com/lemomo-ai/lemo-opuscar)（MIT），详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+- 风格资产库里的 66 种影片风格和封面来自 [lemomo-ai/lemo-opuscar](https://github.com/lemomo-ai/lemo-opuscar)（MIT License, Copyright (c) 2026 LemoLab），完整许可见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
 ## 许可
 

@@ -92,7 +92,7 @@ docs/                       Project page (GitHub Pages), live demo, screenshots
 
 ## Credits
 
-- The 66 film styles and their covers in the style library come from [lemomo-ai/lemo-opuscar](https://github.com/lemomo-ai/lemo-opuscar) (MIT). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+- The 66 film styles and their covers in the style library come from [lemomo-ai/lemo-opuscar](https://github.com/lemomo-ai/lemo-opuscar) (MIT License, Copyright (c) 2026 LemoLab). Full license text in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## License
 
